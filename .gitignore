@@ -75,9 +75,13 @@ docs/_build/
 target/
 
 # Jupyter Notebook
+0_MOSSE.ipynb
+
+# Ohters
 .ipynb_checkpoints
 *.mat
 Mini-OTB/
+
 
 # models
 *.pth

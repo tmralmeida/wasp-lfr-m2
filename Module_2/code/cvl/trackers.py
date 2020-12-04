@@ -27,7 +27,6 @@ class NCCTracker:
         patch = patch/255
         patch = patch - np.mean(patch)
         patch = patch / np.std(patch)
-
         self.template = fft2(patch)
 
     def detect(self, image):
