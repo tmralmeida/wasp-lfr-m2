@@ -292,7 +292,7 @@ class OnlineTrackingBenchmark:
             union = gt_box.union_box(tracked_boxes[frame_idx])
             intersection = gt_box.intersection_box(tracked_boxes[frame_idx])
             iou.append(intersection.area() / union.area())
-
+            
         return iou
 
     def calculate_auc(self, sequence_idx, tracked_boxes):
