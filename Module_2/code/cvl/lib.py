@@ -111,8 +111,16 @@ def get_arguments():
     parser.add_argument(
         "--ds_path",
         "-path",
-        default = "Mini-OTB",
-        help = "Dataset Path"
+        default="Mini-OTB",
+        help="Dataset Path"
+    )
+    
+    parser.add_argument(
+        "--wait_time",
+        "-wt",
+        type=int,
+        default=25,
+        help="0 to press a key in each frame or 25 to wait 25ms"
     )
     
     

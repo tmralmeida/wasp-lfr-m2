@@ -10,7 +10,6 @@ from copy import copy, deepcopy
 
 
 args = get_arguments()
-
 dataset_path = args.ds_path
 
 if __name__ == "__main__":
@@ -40,16 +39,15 @@ if __name__ == "__main__":
             tracker.detect(image)
             tracker.update(image)
         
-        # print(tracker.bbox)
         if args.show_viz:
             bboxes.append(copy(tracker.bbox))
             bbox = tracker.bbox
             pt0 = (bbox.xpos, bbox.ypos)
             pt1 = (bbox.xpos + bbox.width, bbox.ypos + bbox.height)
             image_color = cv2.cvtColor(image_color, cv2.COLOR_RGB2BGR)
-            cv2.rectangle(image_color, pt0, pt1, color=(0, 255, 0), thickness=3)
+            cv2.rectangle(image_color, pt0, pt1, color=(0, 0, 255), thickness=3)
             cv2.imshow("tracker", image_color)
-            cv2.waitKey(0)
+            cv2.waitKey(args.wait_time)
             
     cv2.destroyAllWindows()
     if args.show_results: #plotting iou, auc
