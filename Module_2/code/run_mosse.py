@@ -37,7 +37,7 @@ if __name__ == "__main__":
             tracker.start(image, bbox, roi) # first frame approach
         else:
             tracker.detect(image)
-            tracker.update(image)
+            tracker.update()
         
         if args.show_viz:
             bboxes.append(copy(tracker.bbox))

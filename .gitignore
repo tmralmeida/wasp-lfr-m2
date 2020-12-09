@@ -76,6 +76,7 @@ target/
 
 # Jupyter Notebook
 0_MOSSE.ipynb
+1_DCFMOSSE.ipynb
 
 # Ohters
 .ipynb_checkpoints

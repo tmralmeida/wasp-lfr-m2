@@ -123,7 +123,7 @@ class MOSSETracker:
         loc = np.unravel_index(np.argmax(self.g), self.g.shape) # location of the maximum in the roi (row, col)
         self.bbox, self.roi = transf2ori(loc, self.bbox, self.roi, img.shape) # bbox and roi in the ori cs
         
-    def update(self, img):
+    def update(self):
         self.A = self.lr * np.conj(self.C) * self.P + (1 - self.lr) * self.A # following the slides
         self.B = self.lr * np.conj(self.P) * self.P + (1 - self.lr) * self.B
         
