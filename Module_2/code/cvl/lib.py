@@ -33,6 +33,17 @@ def smooth_edge(img):
     mask = np.sqrt(np.outer(h_h, h_w))
     return img * mask
 
+def get_2d_gauss(shape, sig = 2, min = -10, max = 10):
+    """ 
+    Centered 2D gaussian based on https://www.geeksforgeeks.org/how-to-generate-2-d-gaussian-array-using-numpy/
+    """
+    x, y = np.meshgrid(np.linspace(-10, 10, shape[1]),
+                        np.linspace(-10, 10, shape[0]))
+    dst = np.sqrt (x**2 + y**2)
+    c = np.exp(-((dst**2) / (2.0 * sig**2 )))
+    return c
+    
+
 def transf2ori(loc, bbox, roi, img_s):
     """
     Transform the output of the tracker into the original coordinates
@@ -83,6 +94,15 @@ def get_arguments():
             return False
         else:
             raise argparse.ArgumentTypeError('Boolean value expected.')
+    
+    parser.add_argument(
+        "--tracker",
+        "-t",
+        type=str,
+        default="mosse",
+        choices=["mosse", "deep_f", "hand_f"],
+        help = "Mosse that you want to run. Options: grayscale mosse (mosse), Deep Features w/ multiscale mosse (deep_f), Handcrafted features w/ multichannels mosse (hand_f)"
+    )
         
     parser.add_argument(
         "--ds_idx",
