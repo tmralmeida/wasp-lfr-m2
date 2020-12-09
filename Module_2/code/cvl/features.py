@@ -6,10 +6,9 @@ import os
 
 import numpy as np
 
-if torch.__version__ == "1.2.0":
-    from torchvision.models.utils import load_state_dict_from_url
-else:
-    from torch.utils.model_zoo import load_url
+
+
+from torch.utils.model_zoo import load_url
 
 
 COLOR_NAMES = ['black', 'blue', 'brown', 'grey', 'green', 'orange',
@@ -101,7 +100,7 @@ def alexnetFeatures(pretrained=False, progress=True, **kwargs):
     """
     model = AlexNetFeature(**kwargs)
     if pretrained:
-        state_dict = load_state_dict_from_url(model_urls['alexnet'],
-                                              progress=progress)
+        state_dict = load_url(model_urls['alexnet'],
+                              progress=progress)
         model.load_state_dict(state_dict)
     return model

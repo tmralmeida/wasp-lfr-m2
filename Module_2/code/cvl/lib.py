@@ -1,5 +1,6 @@
 import numpy as np
 import matplotlib.pyplot as plt
+from skimage.filters import window
 import argparse
 from argparse import ArgumentParser 
 from .dataset import BoundingBox
@@ -32,6 +33,7 @@ def smooth_edge(img):
     h_w = np.hanning(img.shape[1])
     mask = np.sqrt(np.outer(h_h, h_w))
     return img * mask
+
 
 def get_2d_gauss(shape, sig = 2, min = -10, max = 10):
     """ 
