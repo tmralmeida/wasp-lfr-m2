@@ -87,7 +87,8 @@ class AlexNetFeature(nn.Module):
         )
 
     def forward(self, x):
-        x = self.features(x)
+        for l in range(2): # just first 2 layers
+            x = self.features[l](x)
         return x
 
 

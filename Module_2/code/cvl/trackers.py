@@ -1,5 +1,6 @@
 import numpy as np
 from scipy.fftpack import fft2, ifft2, fftshift, ifftshift
+import torch
 from .image_io import crop_patch
 from .lib import normalize, smooth_edge, get_2d_gauss, transf2ori
 from .features import alexnetFeatures
@@ -103,6 +104,7 @@ class MOSSETracker:
         p = self.pre_process(img) # paper preprocessing
         
         self.P = fft2(p) # initial patch in the fourier domain
+
         c = get_2d_gauss(self.P.shape, self.sig)
         self.C = fft2(c) # function target
         
@@ -139,47 +141,58 @@ class DCFMOSSETracker:
         self.lambda_ = lambda_
         self.lr = learning_rate
         self.sig = sigma
-        
+        if self.feat_type == "deep_f":
+            # Deep learning stuff
+            self.model = alexnetFeatures(pretrained=True, progress=False)
     def crop_patch(self, img):
         roi = self.roi
-        return crop_patch(img, roi)
+        crop_ch = [crop_patch(ch, roi) for ch in img]
+        return np.array(crop_ch)
         
     def pre_process(self, img):
         """
         Crop, normalize and edges smoother (coisine window)
         """
-        pp_channels = []
-        for c in img:
-            pp_channels.append(smooth_edge(normalize(self.crop_patch(c))))
-        return pp_channels
+        img_n = normalize(self.crop_patch(img))
+        return smooth_edge(img_n)
     
     def start(self, img, bbox, roi):
         assert img.ndim == 3, "This model is for RGB images"
         self.bbox = bbox # initial bounding box
         self.roi = roi # searching roi
-        pp_channels = self.pre_process(img) # paper preprocessing
-        # TODO GET FEATURE MAPS from deep learning
-        self.X = fft2(np.array(pp_channels))
+        p = self.pre_process(img) # paper preprocessing
+
+        if self.feat_type == "deep_f":
+            inp = torch.from_numpy(np.array(p)).unsqueeze(dim = 0).float()
+            features = self.model(inp)
+            feature_maps = features.squeeze().detach().numpy()
+        self.X = np.array([fft2(fm) for fm in feature_maps])
         
-        y = get_2d_gauss(self.X.shape[1:], sig = self.sig)
+        y = get_2d_gauss(self.X.shape, sig = self.sig)
         
         self.Y = fft2(y) # function target
-        
+
         self.A = np.conj(self.Y) * self.X # first frame A (closed form numerator) --> shape (n_channels, h, w)
         self.B = np.sum(np.conj(self.X) * self.X, axis = 0) # first frame B (closed form denominator) 
         
         
     
     def detect(self, img):
-        p_channels = self.pre_process(img)
-        self.X = fft2(np.array(p_channels))
-        
+        p = self.pre_process(img) # paper preprocessing
+        if self.feat_type == "deep_f":
+            inp = torch.from_numpy(np.array(p)).unsqueeze(dim = 0).float()
+            features = self.model(inp)
+            feature_maps = features.squeeze().detach().numpy()
+        self.X = np.array([fft2(fm) for fm in feature_maps])  
+              
         F = self.A / self.B + self.lambda_
         Y = self.X * np.conj(F)
         self.g = ifft2(np.sum(Y, axis=0)).real
+        loc = np.unravel_index(np.argmax(self.g), self.g.shape) # regarding the feature map (row, col)
+        rows = int(loc[0] * self.roi.height/ self.X.shape[-2])
+        cols = int(loc[1] * self.roi.width/ self.X.shape[-1])
         
-        loc = np.unravel_index(np.argmax(self.g), self.g.shape)
-        self.bbox, self.roi = transf2ori(loc, self.bbox, self.roi, img.shape[1:])
+        self.bbox, self.roi = transf2ori((rows,cols), self.bbox, self.roi, img.shape[1:])#transform to the ori frame
         
     def update(self):
         self.A = self.lr * np.conj(self.Y) * self.X + (1 - self.lr) * self.A

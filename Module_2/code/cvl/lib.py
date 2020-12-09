@@ -29,8 +29,8 @@ def smooth_edge(img):
     """ 
     Smoothing edges, following the paper
     """
-    h_h = np.hanning(img.shape[0]) # img.shape --> [h,w]
-    h_w = np.hanning(img.shape[1])
+    h_h = np.hanning(img.shape[-2]) 
+    h_w = np.hanning(img.shape[-1])
     mask = np.sqrt(np.outer(h_h, h_w))
     return img * mask
 
@@ -39,8 +39,8 @@ def get_2d_gauss(shape, sig = 2, min = -10, max = 10):
     """ 
     Centered 2D gaussian based on https://www.geeksforgeeks.org/how-to-generate-2-d-gaussian-array-using-numpy/
     """
-    x, y = np.meshgrid(np.linspace(-10, 10, shape[1]),
-                        np.linspace(-10, 10, shape[0]))
+    x, y = np.meshgrid(np.linspace(-10, 10, shape[-1]),
+                        np.linspace(-10, 10, shape[-2]))
     dst = np.sqrt (x**2 + y**2)
     c = np.exp(-((dst**2) / (2.0 * sig**2 )))
     return c
