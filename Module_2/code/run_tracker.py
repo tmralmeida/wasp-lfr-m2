@@ -7,10 +7,12 @@ from cvl.trackers import MOSSETracker, DCFMOSSETracker
 from cvl.lib import get_roi, resume_performance, get_arguments
 import matplotlib.pyplot as plt
 from copy import copy, deepcopy
-
+import torch
 
 args = get_arguments()
 dataset_path = args.ds_path
+device = "cuda:0" if torch.cuda.is_available() else "cpu:0"
+
 
 if __name__ == "__main__":
     dataset = OnlineTrackingBenchmark(dataset_path)
@@ -21,7 +23,7 @@ if __name__ == "__main__":
     if args.tracker_type == "mosse":
         tracker = MOSSETracker()
     elif args.tracker_type in ["resnet", "mobilenet", "alexnet", "vgg16", "hand_f"]:
-        tracker = DCFMOSSETracker(features = args.tracker_type)
+        tracker = DCFMOSSETracker(dev = device, features = args.tracker_type)
     bboxes = []
     for frame_idx, frame in enumerate(a_seq):
         print(f"{frame_idx} / {len(a_seq)-1}")

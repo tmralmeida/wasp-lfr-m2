@@ -138,27 +138,29 @@ class DCFMOSSETracker:
         - learning_rate: hyperparameter
         - sigma: for 2D gaussian construction
     """
-    def __init__(self, 
+    def __init__(self,
+                 dev, 
                  features = "alexnet",
                  lambda_ = 1e-5, 
                  learning_rate = 0.125, 
                  sigma = 2):
-        
+        self.device = dev
         self.features_extractor = features
         self.lambda_ = lambda_
         self.lr = learning_rate
         self.sig = sigma
         if self.features_extractor == "alexnet":
-            self.model = alexnetFeatures(pretrained=True, progress = False)
+            self.model = alexnetFeatures(pretrained=True, progress = False).to(self.device)
         elif self.features_extractor == "vgg16":
-            self.model = models.vgg16(pretrained=True).features[:2]
+            self.model = models.vgg16(pretrained=True).features[:2].to(self.device)
         elif self.features_extractor == "mobilenet":
-            self.model = models.mobilenet_v2(pretrained=True).features[:2]
+            self.model = models.mobilenet_v2(pretrained=True).features[:2].to(self.device)
         elif self.features_extractor == "resnet":
             resnet = models.resnet50(pretrained=True)
             module = list(resnet.children())[:3]
-            self.model = torch.nn.Sequential(*module)
+            self.model = torch.nn.Sequential(*module).to(self.device)
             
+  
     def crop_patch(self, img):
         roi = self.roi
         crop_ch = [crop_patch(ch, roi) for ch in img]
@@ -192,9 +194,9 @@ class DCFMOSSETracker:
         self.roi = roi # searching roi
         p = self.pre_process(img) # paper preprocessing
         if self.features_extractor in ["resnet", "mobilenet", "vgg16", "alexnet"]:
-            inp = torch.from_numpy(p).unsqueeze(dim = 0).float()
+            inp = torch.from_numpy(p).unsqueeze(dim = 0).float().to(self.device)
             features = self.model(inp)
-            feature_maps = features.squeeze().detach().numpy()
+            feature_maps = features.squeeze().detach().cpu().numpy()
         feature_maps_h = self.pos_process(feature_maps) # applying cosine window
         self.X = np.array([fft2(fm) for fm in feature_maps_h])
         
@@ -209,9 +211,9 @@ class DCFMOSSETracker:
     def detect(self, img):
         p = self.pre_process(img) # paper preprocessing
         if self.features_extractor in ["resnet", "mobilenet", "vgg16", "alexnet"]:
-            inp = torch.from_numpy(np.array(p)).unsqueeze(dim = 0).float()
+            inp = torch.from_numpy(np.array(p)).unsqueeze(dim = 0).float().to(self.device)
             features = self.model(inp)
-            feature_maps = features.squeeze().detach().numpy()
+            feature_maps = features.squeeze().detach().cpu().numpy()
         feature_maps_h = self.pos_process(feature_maps) # applying cosine window
         self.X = np.array([fft2(fm) for fm in feature_maps_h])  
               
