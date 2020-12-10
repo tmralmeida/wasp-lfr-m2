@@ -1,6 +1,8 @@
 import numpy as np
 from scipy.fftpack import fft2, ifft2, fftshift, ifftshift
 import torch
+import torchvision.models as models
+import cv2
 from .image_io import crop_patch
 from .lib import normalize, smooth_edge, get_2d_gauss, transf2ori
 from .features import alexnetFeatures
@@ -127,51 +129,78 @@ class MOSSETracker:
         self.A = self.lr * np.conj(self.C) * self.P + (1 - self.lr) * self.A # following the slides
         self.B = self.lr * np.conj(self.P) * self.P + (1 - self.lr) * self.B
         
-
+        
 class DCFMOSSETracker:
     """ Mosse Tracker variable names according to the slides:
     inputs:
-        - features: handcrafted/deep
+        - feature_extractor: handcrafted or DL
         - lambda: regularization parameter,
         - learning_rate: hyperparameter
         - sigma: for 2D gaussian construction
     """
-    def __init__(self, features = "deep_f", lambda_ = 1e-5, learning_rate = 0.125, sigma = 2):
-        self.feat_type = features
+    def __init__(self, 
+                 features = "alexnet",
+                 lambda_ = 1e-5, 
+                 learning_rate = 0.125, 
+                 sigma = 2):
+        
+        self.features_extractor = features
         self.lambda_ = lambda_
         self.lr = learning_rate
         self.sig = sigma
-        if self.feat_type == "deep_f":
-            # Deep learning stuff
-            self.model = alexnetFeatures(pretrained=True, progress=False)
+        if self.features_extractor == "alexnet":
+            self.model = alexnetFeatures(pretrained=True, progress = False)
+        elif self.features_extractor == "vgg16":
+            self.model = models.vgg16(pretrained=True).features[:2]
+        elif self.features_extractor == "mobilenet":
+            self.model = models.mobilenet_v2(pretrained=True).features[:2]
+        elif self.features_extractor == "resnet":
+            resnet = models.resnet50(pretrained=True)
+            module = list(resnet.children())[:3]
+            self.model = torch.nn.Sequential(*module)
+            
     def crop_patch(self, img):
         roi = self.roi
         crop_ch = [crop_patch(ch, roi) for ch in img]
         return np.array(crop_ch)
-        
-    def pre_process(self, img):
+    
+    
+    def normalize_imgnet(self, img, mean = [0.485, 0.456, 0.406], std = [0.229, 0.224, 0.225]):
+        mean = np.reshape(mean, (3,1,1))
+        std = np.reshape(std, (3,1,1))
+        img /= 255
+        return (img - np.array(mean)) / np.array(std)
+    
+    
+    def pre_process(self, img, inp_shape = (224,224)):
         """
         Crop, normalize and edges smoother (coisine window)
         """
-        img_n = normalize(self.crop_patch(img))
-        return smooth_edge(img_n)
+        if self.features_extractor == "alexnet":
+            inp_shape = (227,227)
+        img_n = self.normalize_imgnet(self.crop_patch(img))
+        img_proc = cv2.resize(np.transpose(img_n, (1,2,0)), inp_shape)
+        return np.transpose(img_proc, (2,0,1))
+    
+    def pos_process(self, feature_maps):
+        return np.array([smooth_edge(fm) for fm in feature_maps])
+    
     
     def start(self, img, bbox, roi):
         assert img.ndim == 3, "This model is for RGB images"
         self.bbox = bbox # initial bounding box
         self.roi = roi # searching roi
         p = self.pre_process(img) # paper preprocessing
-
-        if self.feat_type == "deep_f":
-            inp = torch.from_numpy(np.array(p)).unsqueeze(dim = 0).float()
+        if self.features_extractor in ["resnet", "mobilenet", "vgg16", "alexnet"]:
+            inp = torch.from_numpy(p).unsqueeze(dim = 0).float()
             features = self.model(inp)
             feature_maps = features.squeeze().detach().numpy()
-        self.X = np.array([fft2(fm) for fm in feature_maps])
+        feature_maps_h = self.pos_process(feature_maps) # applying cosine window
+        self.X = np.array([fft2(fm) for fm in feature_maps_h])
         
         y = get_2d_gauss(self.X.shape, sig = self.sig)
         
         self.Y = fft2(y) # function target
-
         self.A = np.conj(self.Y) * self.X # first frame A (closed form numerator) --> shape (n_channels, h, w)
         self.B = np.sum(np.conj(self.X) * self.X, axis = 0) # first frame B (closed form denominator) 
         
@@ -179,11 +208,12 @@ class DCFMOSSETracker:
     
     def detect(self, img):
         p = self.pre_process(img) # paper preprocessing
-        if self.feat_type == "deep_f":
+        if self.features_extractor in ["resnet", "mobilenet", "vgg16", "alexnet"]:
             inp = torch.from_numpy(np.array(p)).unsqueeze(dim = 0).float()
             features = self.model(inp)
             feature_maps = features.squeeze().detach().numpy()
-        self.X = np.array([fft2(fm) for fm in feature_maps])  
+        feature_maps_h = self.pos_process(feature_maps) # applying cosine window
+        self.X = np.array([fft2(fm) for fm in feature_maps_h])  
               
         F = self.A / self.B + self.lambda_
         Y = self.X * np.conj(F)
@@ -199,6 +229,4 @@ class DCFMOSSETracker:
         self.B = self.lr * np.sum(np.conj(self.X) * self.X, axis = 0) + (1 - self.lr) * self.B
         
         
-
-
         

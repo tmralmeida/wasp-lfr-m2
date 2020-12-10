@@ -102,7 +102,7 @@ def get_arguments():
         "-tt",
         type=str,
         default="mosse",
-        choices=["mosse", "alexnet", "vgg16", "hand_f"],
+        choices=["mosse", "resnet", "mobilenet", "alexnet", "vgg16", "hand_f"],
         help = "Mosse that you want to run. Options: grayscale mosse (mosse), Deep Features, Handcrafted features (hand_f)"
     )
         
