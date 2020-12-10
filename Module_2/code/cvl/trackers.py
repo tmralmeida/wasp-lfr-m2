@@ -74,8 +74,7 @@ class MOSSETracker:
             - learning_rate: hyperparameter
             - sigma: for 2D gaussian construction
     """
-    def __init__(self, features = "deep", lambda_ = 1e-5, learning_rate = 0.125, sigma = 2):
-        self.feat_extractor = features
+    def __init__(self, lambda_ = 1e-5, learning_rate = 0.125, sigma = 2):
         self.lambda_ = lambda_
         self.lr = learning_rate
         self.sig = sigma
@@ -88,8 +87,7 @@ class MOSSETracker:
         self.g = 0
         
     def crop_patch(self, img):
-        roi = self.roi
-        return crop_patch(img, roi)
+        return crop_patch(img, self.roi)
         
     def pre_process(self, img):
         """
@@ -124,6 +122,7 @@ class MOSSETracker:
         
         loc = np.unravel_index(np.argmax(self.g), self.g.shape) # location of the maximum in the roi (row, col)
         self.bbox, self.roi = transf2ori(loc, self.bbox, self.roi, img.shape) # bbox and roi in the ori cs
+        
         
     def update(self):
         self.A = self.lr * np.conj(self.C) * self.P + (1 - self.lr) * self.A # following the slides
