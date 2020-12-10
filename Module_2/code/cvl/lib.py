@@ -21,8 +21,10 @@ def normalize(img_cropped):
     """
     Patch normalization
     """
-    img_cropped /= 255
-    return (img_cropped - np.mean(img_cropped)) / np.std(img_cropped)
+    # https://www.geeksforgeeks.org/log-transformation-of-an-image-using-python-and-opencv/
+    c = 255 / np.log(1 + np.max(img_cropped))
+    log_image = c * (np.log(img_cropped + 1))
+    return (log_image - np.mean(log_image)) / np.std(log_image)
 
 
 def smooth_edge(img):

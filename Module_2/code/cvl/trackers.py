@@ -74,7 +74,7 @@ class MOSSETracker:
             - learning_rate: hyperparameter
             - sigma: for 2D gaussian construction
     """
-    def __init__(self, lambda_ = 1e-5, learning_rate = 0.125, sigma = 2):
+    def __init__(self, lambda_ = 1e-5, learning_rate = 0.05, sigma = 2):
         self.lambda_ = lambda_
         self.lr = learning_rate
         self.sig = sigma
@@ -141,7 +141,7 @@ class DCFMOSSETracker:
                  dev, 
                  features = "alexnet",
                  lambda_ = 1e-5, 
-                 learning_rate = 0.125, 
+                 learning_rate = 1e-3, 
                  sigma = 2):
         self.device = dev
         self.features_extractor = features
