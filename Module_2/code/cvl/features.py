@@ -1,15 +1,9 @@
 import torch
 import torch.nn as nn
-
 import scipy.io
 import os
-
 import numpy as np
-
-
-
 from torch.utils.model_zoo import load_url
-
 
 COLOR_NAMES = ['black', 'blue', 'brown', 'grey', 'green', 'orange',
                'pink', 'purple', 'red', 'white', 'yellow']
@@ -57,7 +51,6 @@ model_urls = {
 
 
 class AlexNetFeature(nn.Module):
-
     def __init__(self, num_classes=1000):
         super(AlexNetFeature, self).__init__()
         self.features = nn.Sequential(
@@ -105,3 +98,4 @@ def alexnetFeatures(pretrained=False, progress=True, **kwargs):
                               progress=progress)
         model.load_state_dict(state_dict)
     return model
+

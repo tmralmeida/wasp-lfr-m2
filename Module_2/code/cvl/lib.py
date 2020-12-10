@@ -98,12 +98,12 @@ def get_arguments():
             raise argparse.ArgumentTypeError('Boolean value expected.')
     
     parser.add_argument(
-        "--tracker",
-        "-t",
+        "--tracker_type",
+        "-tt",
         type=str,
         default="mosse",
-        choices=["mosse", "deep_f", "hand_f"],
-        help = "Mosse that you want to run. Options: grayscale mosse (mosse), Deep Features w/ multiscale mosse (deep_f), Handcrafted features w/ multichannels mosse (hand_f)"
+        choices=["mosse", "alexnet", "vgg16", "hand_f"],
+        help = "Mosse that you want to run. Options: grayscale mosse (mosse), Deep Features, Handcrafted features (hand_f)"
     )
         
     parser.add_argument(

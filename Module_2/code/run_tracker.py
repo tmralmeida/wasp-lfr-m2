@@ -3,7 +3,8 @@
 import cv2
 import numpy as np
 from cvl.dataset import OnlineTrackingBenchmark
-from cvl.trackers import MOSSETracker, DCFMOSSETracker
+from cvl.trackers import MOSSETracker#, DCFMOSSETracker
+from cvl.mc_mosse import DCFMOSSETracker
 from cvl.lib import get_roi, resume_performance, get_arguments
 import matplotlib.pyplot as plt
 from copy import copy, deepcopy
@@ -18,15 +19,15 @@ if __name__ == "__main__":
     
     if args.show_viz: #visual results
         cv2.namedWindow("tracker")
-    if args.tracker == "mosse":
+    if args.tracker_type == "mosse":
         tracker = MOSSETracker()
-    elif args.tracker in ["deep_f", "hand_f"]:
-        tracker = DCFMOSSETracker(features = args.tracker)
+    elif args.tracker_type in ["alexnet", "vgg16", "hand_f"]:
+        tracker = DCFMOSSETracker(features = args.tracker_type)
     bboxes = []
     for frame_idx, frame in enumerate(a_seq):
         print(f"{frame_idx} / {len(a_seq)-1}")
         image_color = frame['image']
-        if args.tracker == "mosse":
+        if args.tracker_type == "mosse":
             image = np.sum(image_color, 2) / 3 # grayscale
         else:
             image = np.transpose(np.float64(image_color), (2, 0, 1))
