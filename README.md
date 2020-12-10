@@ -23,4 +23,4 @@ python run_tracker.py --tracker_type resnet --ds_idx 4 --wait time 0
 ````
 
 This would run dataset 4 with deep features (from a Resnet layer) in the multi-channel MOSSE, and the
-user have to press any key to continue to the next frame (--wait_time 0).
+user has to press any key to continue to the next frame (--wait_time 0).
