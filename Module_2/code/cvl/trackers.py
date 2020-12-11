@@ -116,10 +116,9 @@ class MOSSETracker:
         p = self.pre_process(img) # paper pre processing
         self.P = fft2(p) # patch in the fourier domain
 
-        M = self.A / (self.lambda_ * self.B) # filter in the fourier domain
+        M = self.A / (self.lambda_ + self.B) # filter in the fourier domain
         G = self.P * np.conj(M) # output in the fourier domain
         self.g = ifft2(G).real # output
-        
         loc = np.unravel_index(np.argmax(self.g), self.g.shape) # location of the maximum in the roi (row, col)
         self.bbox, self.roi = transf2ori(loc, self.bbox, self.roi, img.shape) # bbox and roi in the ori cs
         
