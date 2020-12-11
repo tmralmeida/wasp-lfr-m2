@@ -1,6 +1,5 @@
 import numpy as np
 import matplotlib.pyplot as plt
-from skimage.filters import window
 import argparse
 from argparse import ArgumentParser 
 from .dataset import BoundingBox
