@@ -79,6 +79,7 @@ target/
 1_DCFMOSSE.ipynb
 2_DeepMOSSE.ipynb
 3_Squared_ROI.ipynb
+results.ipynb
 
 # Ohters
 .ipynb_checkpoints
@@ -151,4 +152,3 @@ dmypy.json
 mlruns
 
 checkpoints*
-*.json
