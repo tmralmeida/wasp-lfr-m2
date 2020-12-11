@@ -48,8 +48,8 @@ if __name__ == "__main__":
             tracker.detect(image)
             tracker.update()
         
+        bboxes.append(copy(tracker.bbox))
         if args.show_viz:
-            bboxes.append(copy(tracker.bbox))
             bbox = tracker.bbox
             pt0 = (bbox.xpos, bbox.ypos)
             pt1 = (bbox.xpos + bbox.width, bbox.ypos + bbox.height)

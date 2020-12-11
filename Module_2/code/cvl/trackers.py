@@ -170,7 +170,7 @@ class DCFMOSSETracker:
         mean = np.reshape(mean, (3,1,1))
         std = np.reshape(std, (3,1,1))
         img /= 255
-        return (img - np.array(mean)) / np.array(std)
+        return (img - mean) / std
     
     
     def pre_process(self, img, inp_shape = (224,224)):
