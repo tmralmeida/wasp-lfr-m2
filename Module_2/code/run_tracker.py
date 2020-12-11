@@ -22,8 +22,10 @@ if __name__ == "__main__":
         cv2.namedWindow("tracker")
     if args.tracker_type == "mosse":
         tracker = MOSSETracker()
+        squared = False
     elif args.tracker_type in ["resnet", "mobilenet", "alexnet", "vgg16", "hand_f"]:
         tracker = DCFMOSSETracker(dev = device, features = args.tracker_type)
+        squared = True
     bboxes = []
     for frame_idx, frame in enumerate(a_seq):
         print(f"{frame_idx} / {len(a_seq)-1}")
@@ -40,7 +42,7 @@ if __name__ == "__main__":
 
             if bbox.height % 2 == 0:
                 bbox.height += 1
-            roi = get_roi(bbox) # get roi slightly bigger that bbox
+            roi = get_roi(bbox, squared = squared) # get roi slightly bigger that bbox
             tracker.start(image, bbox, roi) # first frame approach
         else:
             tracker.detect(image)

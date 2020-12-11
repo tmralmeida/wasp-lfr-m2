@@ -78,6 +78,7 @@ target/
 0_MOSSE.ipynb
 1_DCFMOSSE.ipynb
 2_DeepMOSSE.ipynb
+3_Squared_ROI.ipynb
 
 # Ohters
 .ipynb_checkpoints
