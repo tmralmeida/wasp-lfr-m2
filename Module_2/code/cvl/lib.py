@@ -4,33 +4,28 @@ import argparse
 from argparse import ArgumentParser 
 from .dataset import BoundingBox
 
-def get_roi(bbox, delta = 1.5, min_val = 18, squared = False):
-    """
-    Computes the region of interest to find the target
-    """
-    if squared:
-        max_side = max(bbox.width, bbox.height)
-        if max_side == bbox.width:
-            delta = (bbox.width - bbox.height) // 2
-            search_window_tl = (bbox.xpos, bbox.ypos - delta)
-            search_window_br = (bbox.xpos + bbox.width, bbox.ypos + bbox.height + delta)
-            w = bbox.width
-            h = bbox.height + 2*delta
 
+def get_roi(bbox, delta = 1.5, min_val = 18, squared = False):
+    d_x = max(bbox.width*(delta-1)/2, min_val)
+    d_y = max(bbox.height*(delta-1)/2, min_val)
+    w = int(bbox.width + 2 * d_x)
+    h = int(bbox.height + 2 * d_y)
+    roi_tl = (bbox.xpos - d_x, bbox.ypos - d_y)
+    roi =  BoundingBox("tl-size", int(roi_tl[0]), int(roi_tl[1]), w, h)
+    
+    if squared:
+        max_side = max(roi.width, roi.height)
+        if max_side == roi.width:
+            dx = (roi.width - roi.height) // 2
+            roi_tl = (roi.xpos, roi.ypos - dx)
+            w = roi.width
+            h = w
         else:
-            delta = (bbox.height - bbox.width) // 2
-            search_window_tl = (bbox.xpos - delta, bbox.ypos) 
-            search_window_br = (bbox.xpos + bbox.width + delta, bbox.ypos + bbox.height)
-            w = bbox.width + 2*delta
-            h = bbox.height
-    else:
-        d_x = max(bbox.width*(delta-1)/2, min_val)
-        d_y = max(bbox.height*(delta-1)/2, min_val)
-        w = int(bbox.width + 2 * d_x)
-        h = int(bbox.height + 2 * d_y)
-        search_window_tl = (bbox.xpos - d_x, bbox.ypos - d_y)
-        search_window_br = (bbox.xpos + w - d_x, bbox.ypos + h - d_y)
-    return  BoundingBox("tl-size", int(search_window_tl[0]), int(search_window_tl[1]), w, h)
+            dy = (roi.height - roi.width) // 2
+            roi_tl = (roi.xpos - dy, roi.ypos)
+            h = roi.height
+            w = h
+    return BoundingBox("tl-size", int(roi_tl[0]), int(roi_tl[1]), w, h) 
 
 def normalize(img_cropped):
     """

@@ -152,10 +152,10 @@ class DCFMOSSETracker:
         elif self.features_extractor == "vgg16":
             self.model = models.vgg16(pretrained=True).features[:2].to(self.device)
         elif self.features_extractor == "mobilenet":
-            self.model = models.mobilenet_v2(pretrained=True).features[:2].to(self.device)
+            self.model = models.mobilenet_v2(pretrained=True).features[:3].to(self.device) # best layer -> 3 
         elif self.features_extractor == "resnet":
             resnet = models.resnet50(pretrained=True)
-            module = list(resnet.children())[:3]
+            module = list(resnet.children())[:3] # best layer -> layer 1
             self.model = torch.nn.Sequential(*module).to(self.device)
             
   
