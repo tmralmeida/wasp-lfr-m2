@@ -13,7 +13,6 @@ args = get_arguments()
 dataset_path = args.ds_path
 device = "cuda:0" if torch.cuda.is_available() else "cpu:0"
 
-
 if __name__ == "__main__":
     dataset = OnlineTrackingBenchmark(dataset_path)
     a_seq = dataset[args.ds_idx]
@@ -36,7 +35,6 @@ if __name__ == "__main__":
             image = np.transpose(np.float64(image_color), (2, 0, 1))
         if frame_idx == 0:
             bbox = copy(frame['bounding_box'])
-            aaaa = bbox
             if bbox.width % 2 == 0:
                 bbox.width += 1
 
