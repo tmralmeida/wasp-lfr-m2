@@ -192,8 +192,8 @@ class DCFMOSSETracker:
     
     
     def get_hog_feat(self, img):
-        ppc = (8, 8)
-        cpb = (3, 5)
+        cpb = (1, 1)
+        ppc = (3, 5)
         n_ori = 8
         hog_feat = np.empty_like(img)
 
