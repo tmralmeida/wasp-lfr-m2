@@ -193,7 +193,7 @@ class DCFMOSSETracker:
     
     def get_hog_feat(self, img):
         ppc = (8, 8)
-        cpb = (1, 1)
+        cpb = (3, 5)
         n_ori = 8
         hog_feat = np.empty_like(img)
 
@@ -218,7 +218,7 @@ class DCFMOSSETracker:
             inp = torch.from_numpy(p).unsqueeze(dim = 0).float().to(self.device)
             features = self.model(inp)
             feature_maps = features.squeeze().detach().cpu().numpy()
-        else: # handracfted features
+        else: # hog
             feature_maps = self.get_hog_feat(p)
         feature_maps_h = self.pos_process(feature_maps) # applying cosine window
         self.X = np.array([fft2(fm) for fm in feature_maps_h])
@@ -237,7 +237,7 @@ class DCFMOSSETracker:
             inp = torch.from_numpy(np.array(p)).unsqueeze(dim = 0).float().to(self.device)
             features = self.model(inp)
             feature_maps = features.squeeze().detach().cpu().numpy()
-        else:
+        else: # hog
             feature_maps = self.get_hog_feat(p)
         feature_maps_h = self.pos_process(feature_maps) # applying cosine window
         self.X = np.array([fft2(fm) for fm in feature_maps_h])  

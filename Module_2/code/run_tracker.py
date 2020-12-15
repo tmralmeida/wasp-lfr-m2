@@ -23,7 +23,7 @@ if __name__ == "__main__":
         tracker = MOSSETracker()
         squared = False
         bigger = args.bigger_roi
-    elif args.tracker_type in ["resnet", "mobilenet", "alexnet", "vgg16", "hand_f"]:
+    elif args.tracker_type in ["resnet", "mobilenet", "alexnet", "vgg16", "hog"]:
         tracker = DCFMOSSETracker(dev = device, features = args.tracker_type)
         squared = args.squared_roi
         bigger = args.bigger_roi
