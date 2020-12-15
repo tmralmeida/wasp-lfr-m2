@@ -22,9 +22,11 @@ if __name__ == "__main__":
     if args.tracker_type == "mosse":
         tracker = MOSSETracker()
         squared = False
+        bigger = args.bigger_roi
     elif args.tracker_type in ["resnet", "mobilenet", "alexnet", "vgg16", "hand_f"]:
         tracker = DCFMOSSETracker(dev = device, features = args.tracker_type)
-        squared = True
+        squared = args.squared_roi
+        bigger = args.bigger_roi
     bboxes = []
     for frame_idx, frame in enumerate(a_seq):
         print(f"{frame_idx} / {len(a_seq)-1}")
@@ -40,7 +42,7 @@ if __name__ == "__main__":
 
             if bbox.height % 2 == 0:
                 bbox.height += 1
-            roi = get_roi(bbox, squared = squared) # get roi slightly bigger that bbox
+            roi = get_roi(bbox, squared = squared, bigger = bigger) # get roi slightly bigger than bbox
             tracker.start(image, bbox, roi) # first frame approach
         else:
             tracker.detect(image)

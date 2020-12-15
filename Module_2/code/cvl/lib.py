@@ -5,14 +5,16 @@ from argparse import ArgumentParser
 from .dataset import BoundingBox
 
 
-def get_roi(bbox, delta = 1.5, min_val = 18, squared = False):
-    d_x = max(bbox.width*(delta-1)/2, min_val)
-    d_y = max(bbox.height*(delta-1)/2, min_val)
-    w = int(bbox.width + 2 * d_x)
-    h = int(bbox.height + 2 * d_y)
-    roi_tl = (bbox.xpos - d_x, bbox.ypos - d_y)
-    roi =  BoundingBox("tl-size", int(roi_tl[0]), int(roi_tl[1]), w, h)
-    
+def get_roi(bbox, delta = 1.5, min_val = 18, squared = False, bigger = False):
+    if bigger:
+        d_x = max(bbox.width*(delta-1)/2, min_val)
+        d_y = max(bbox.height*(delta-1)/2, min_val)
+        w = int(bbox.width + 2 * d_x)
+        h = int(bbox.height + 2 * d_y)
+        roi_tl = (bbox.xpos - d_x, bbox.ypos - d_y)
+        roi =  BoundingBox("tl-size", int(roi_tl[0]), int(roi_tl[1]), w, h)
+    else:
+        roi = bbox
     if squared:
         max_side = max(roi.width, roi.height)
         if max_side == roi.width:
@@ -108,6 +110,22 @@ def get_arguments():
             return False
         else:
             raise argparse.ArgumentTypeError('Boolean value expected.')
+        
+    parser.add_argument(
+        "--bigger_roi",
+        "-br",
+        type=str2bool,
+        default=True,
+        help="Whether use bigger roi or not"
+    )
+    
+    parser.add_argument(
+        "--squared_roi",
+        "-sc",
+        type=str2bool,
+        default=True,
+        help="Using a squared roi"
+    )
     
     parser.add_argument(
         "--tracker_type",
