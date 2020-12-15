@@ -80,7 +80,7 @@ class AlexNetFeature(nn.Module):
         )
 
     def forward(self, x):
-        for l in range(5): # until layer 2 -> best result
+        for l in range(12): # until layer 5 -> best result and faster
             x = self.features[l](x)
         return x
 

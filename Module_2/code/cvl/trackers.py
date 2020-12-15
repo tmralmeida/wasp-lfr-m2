@@ -148,14 +148,14 @@ class DCFMOSSETracker:
         self.lr = learning_rate
         self.sig = sigma
         if self.features_extractor == "alexnet":
-            self.model = alexnetFeatures(pretrained=True, progress = False).to(self.device)
+            self.model = alexnetFeatures(pretrained=True, progress = False).to(self.device) # best layer + faster -> layer 5
         elif self.features_extractor == "vgg16":
-            self.model = models.vgg16(pretrained=True).features[:12].to(self.device) # best layers -> 5
+            self.model = models.vgg16(pretrained=True).features[:23].to(self.device) # best layer -> 10
         elif self.features_extractor == "mobilenet":
             self.model = models.mobilenet_v2(pretrained=True).features[:6].to(self.device) # best layer -> 6 
         elif self.features_extractor == "resnet":
             resnet = models.resnet50(pretrained=True)
-            module = list(resnet.children())[:6] # best layer -> layer 3
+            module = list(resnet.children())[:6] 
             self.model = torch.nn.Sequential(*module).to(self.device)
             
   
