@@ -3,6 +3,7 @@ from scipy.fftpack import fft2, ifft2, fftshift, ifftshift
 import torch
 import torchvision.models as models
 import cv2
+from skimage.feature import hog
 from .image_io import crop_patch
 from .lib import normalize, smooth_edge, get_2d_gauss, transf2ori
 from .features import alexnetFeatures
@@ -176,14 +177,36 @@ class DCFMOSSETracker:
         """
         Crop, normalize and edges smoother (coisine window)
         """
-        if self.features_extractor == "alexnet":
-            inp_shape = (227,227)
-        img_n = self.normalize_imgnet(self.crop_patch(img))
-        img_proc = cv2.resize(np.transpose(img_n, (1,2,0)), inp_shape)
-        return np.transpose(img_proc, (2,0,1))
+        if self.features_extractor in ["resnet", "mobilenet", "vgg16", "alexnet"]:
+            if self.features_extractor == "alexnet":
+                inp_shape = (227,227)
+            img_n = self.normalize_imgnet(self.crop_patch(img))
+            img_proc = cv2.resize(np.transpose(img_n, (1,2,0)), inp_shape)
+            out = np.transpose(img_proc, (2,0,1))
+        else: # handrafted
+            out = normalize(self.crop_patch(img))
+        return out
     
     def pos_process(self, feature_maps):
         return np.array([smooth_edge(fm) for fm in feature_maps])
+    
+    
+    def get_hog_feat(self, img):
+        ppc = (8, 8)
+        cpb = (1, 1)
+        n_ori = 8
+        hog_feat = np.empty_like(img)
+
+        for idx, i in enumerate(img):
+            fd, hog_img = hog(i, 
+                              orientations=n_ori, 
+                              pixels_per_cell=ppc, 
+                              cells_per_block=cpb,
+                              visualize=True, 
+                              multichannel=False)
+            hog_feat[idx, ...] = hog_img
+
+        return hog_feat
     
     
     def start(self, img, bbox, roi):
@@ -195,6 +218,8 @@ class DCFMOSSETracker:
             inp = torch.from_numpy(p).unsqueeze(dim = 0).float().to(self.device)
             features = self.model(inp)
             feature_maps = features.squeeze().detach().cpu().numpy()
+        else: # handracfted features
+            feature_maps = self.get_hog_feat(p)
         feature_maps_h = self.pos_process(feature_maps) # applying cosine window
         self.X = np.array([fft2(fm) for fm in feature_maps_h])
         
@@ -212,6 +237,8 @@ class DCFMOSSETracker:
             inp = torch.from_numpy(np.array(p)).unsqueeze(dim = 0).float().to(self.device)
             features = self.model(inp)
             feature_maps = features.squeeze().detach().cpu().numpy()
+        else:
+            feature_maps = self.get_hog_feat(p)
         feature_maps_h = self.pos_process(feature_maps) # applying cosine window
         self.X = np.array([fft2(fm) for fm in feature_maps_h])  
               
