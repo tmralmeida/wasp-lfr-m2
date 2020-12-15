@@ -150,9 +150,9 @@ class DCFMOSSETracker:
         if self.features_extractor == "alexnet":
             self.model = alexnetFeatures(pretrained=True, progress = False).to(self.device) # best layer + faster -> layer 5
         elif self.features_extractor == "vgg16":
-            self.model = models.vgg16(pretrained=True).features[:23].to(self.device) # best layer -> 10
+            self.model = models.vgg16(pretrained=True).features[:9].to(self.device) # best block -> 4
         elif self.features_extractor == "mobilenet":
-            self.model = models.mobilenet_v2(pretrained=True).features[:6].to(self.device) # best layer -> 6 
+            self.model = models.mobilenet_v2(pretrained=True).features[:7].to(self.device) # best bottleneck -> 3 
         elif self.features_extractor == "resnet":
             resnet = models.resnet50(pretrained=True)
             module = list(resnet.children())[:6] 
