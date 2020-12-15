@@ -6,6 +6,8 @@ from .dataset import BoundingBox
 
 
 def get_roi(bbox, delta = 1.5, min_val = 18, squared = False, bigger = False):
+    if not squared and not bigger:
+        return bbox
     if bigger:
         d_x = max(bbox.width*(delta-1)/2, min_val)
         d_y = max(bbox.height*(delta-1)/2, min_val)
@@ -121,7 +123,7 @@ def get_arguments():
     
     parser.add_argument(
         "--squared_roi",
-        "-sc",
+        "-sr",
         type=str2bool,
         default=True,
         help="Using a squared roi"
