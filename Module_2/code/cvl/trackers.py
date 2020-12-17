@@ -151,7 +151,7 @@ class DCFMOSSETracker:
         if self.features_extractor == "alexnet":
             self.model = alexnetFeatures(pretrained=True, progress = False).to(self.device) # best layer + faster -> layer 5
         elif self.features_extractor == "vgg16":
-            self.model = models.vgg16(pretrained=True).features[:9].to(self.device) # best block -> 4
+            self.model = models.vgg16(pretrained=True).features[:23].to(self.device) # best block -> 4
         elif self.features_extractor == "mobilenet":
             self.model = models.mobilenet_v2(pretrained=True).features[:7].to(self.device) # best bottleneck -> 3 
         elif self.features_extractor == "resnet":
@@ -183,8 +183,8 @@ class DCFMOSSETracker:
             img_n = self.normalize_imgnet(self.crop_patch(img))
             img_proc = cv2.resize(np.transpose(img_n, (1,2,0)), inp_shape)
             out = np.transpose(img_proc, (2,0,1))
-        else: # handrafted
-            out = normalize(self.crop_patch(img))
+        else: # handcrafted
+            out = self.crop_patch(img) 
         return out
     
     def pos_process(self, feature_maps):
@@ -195,16 +195,16 @@ class DCFMOSSETracker:
         cpb = (1, 1)
         ppc = (3, 5)
         n_ori = 8
-        hog_feat = np.empty_like(img)
-
-        for idx, i in enumerate(img):
-            fd, hog_img = hog(i, 
+        hog_feat = np.empty([4, *img.shape[1:]])
+        hog_feat[0,...] =  smooth_edge(normalize(np.sum(img, 0) / 3))
+        for idx, ch in enumerate(img):
+            fd, hog_img = hog(smooth_edge(normalize(ch)), 
                               orientations=n_ori, 
                               pixels_per_cell=ppc, 
                               cells_per_block=cpb,
                               visualize=True, 
                               multichannel=False)
-            hog_feat[idx, ...] = hog_img
+            hog_feat[idx+1, ...] = hog_img
 
         return hog_feat
     
@@ -218,9 +218,9 @@ class DCFMOSSETracker:
             inp = torch.from_numpy(p).unsqueeze(dim = 0).float().to(self.device)
             features = self.model(inp)
             feature_maps = features.squeeze().detach().cpu().numpy()
+            feature_maps_h = self.pos_process(feature_maps) # applying cosine window
         else: # hog
-            feature_maps = self.get_hog_feat(p)
-        feature_maps_h = self.pos_process(feature_maps) # applying cosine window
+            feature_maps_h = self.get_hog_feat(p)
         self.X = np.array([fft2(fm) for fm in feature_maps_h])
         
         y = get_2d_gauss(self.X.shape, sig = self.sig)
@@ -237,9 +237,10 @@ class DCFMOSSETracker:
             inp = torch.from_numpy(np.array(p)).unsqueeze(dim = 0).float().to(self.device)
             features = self.model(inp)
             feature_maps = features.squeeze().detach().cpu().numpy()
+            feature_maps_h = self.pos_process(feature_maps) # applying cosine window
         else: # hog
-            feature_maps = self.get_hog_feat(p)
-        feature_maps_h = self.pos_process(feature_maps) # applying cosine window
+            feature_maps_h = self.get_hog_feat(p)
+        
         self.X = np.array([fft2(fm) for fm in feature_maps_h])  
               
         F = self.A / self.B + self.lambda_
