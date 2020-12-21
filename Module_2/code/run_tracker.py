@@ -20,11 +20,15 @@ if __name__ == "__main__":
     if args.show_viz: #visual results
         cv2.namedWindow("tracker")
     if args.tracker_type == "mosse":
-        tracker = MOSSETracker()
+        tracker = MOSSETracker(lambda_ = args.lambda_,
+                               learning_rate = args.learning_rate)
         squared = False
         bigger = args.bigger_roi
     elif args.tracker_type in ["resnet", "mobilenet", "alexnet", "vgg16", "hog"]:
-        tracker = DCFMOSSETracker(dev = device, features = args.tracker_type)
+        tracker = DCFMOSSETracker(dev = device, 
+                                  features = args.tracker_type,
+                                  lambda_ = args.lambda_,
+                                  learning_rate = args.learning_rate)
         squared = args.squared_roi
         bigger = args.bigger_roi
     bboxes = []

@@ -183,12 +183,12 @@ def get_arguments():
         "--learning_rate",
         "-lr",
         type=float,
-        default=0.125,
+        default=0.05,
         help="Learning rate value; Default: 0.125 (paper)"
     )
     
     parser.add_argument(
-        "--lambda",
+        "--lambda_",
         type=int,
         default=1e-5,
         help="Regularization parameter;"
