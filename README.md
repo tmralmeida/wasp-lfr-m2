@@ -25,6 +25,15 @@ python run_tracker.py --tracker_type resnet --learning_rate 1e-3 --ds_idx 4 --wa
 This would run dataset 4 with deep features (from a Resnet layer) in the multi-channel MOSSE with a learning rate of 1e-3, and the
 user has to press any key to continue to the next frame (--wait_time 0).
 
+
+Saving visually results:
+
+````
+python run_tracker.py --wait_time 0
+````
+
+And then, press "s" when for saving the resulting image.
+
 ## Hyperparameters:
 
 Grayscale MOSSE:
