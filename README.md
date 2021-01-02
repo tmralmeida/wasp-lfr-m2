@@ -26,13 +26,13 @@ This would run dataset 4 with deep features (from a Resnet layer) in the multi-c
 user has to press any key to continue to the next frame (--wait_time 0).
 
 
-Saving visually results:
+Saving visual results:
 
 ````
 python run_tracker.py --wait_time 0
 ````
 
-And then, press "s" when for saving the resulting image.
+And then, press "s" for saving the resulting image.
 
 ## Hyperparameters:
 
