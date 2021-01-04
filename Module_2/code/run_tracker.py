@@ -61,7 +61,7 @@ if __name__ == "__main__":
             cv2.rectangle(image_color, pt0, pt1, color=(0, 0, 255), thickness=3)
             cv2.imshow("tracker", image_color)
             if cv2.waitKey(args.wait_time) == ord("s"):
-                cv2.imwrite(f"../results/imgs/ds_{args.ds_idx}-img_{frame_idx}.png", image_color)
+                cv2.imwrite(f"../results/imgs/{args.tracker_type}_ds_{args.ds_idx}-img_{frame_idx}.png", image_color)
                 print("image saved")
             
     cv2.destroyAllWindows()
