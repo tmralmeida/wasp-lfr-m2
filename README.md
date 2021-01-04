@@ -14,12 +14,14 @@ Code for Learning Features Representation WASP course module 2.
 | --wait_time         |     `int`        | `25`               | Time between each frame|
 | --learning_rate     |     `int`        | `0.05`             | Learning rate value    |
 | --lambda            |     `int`        | `1e-5`             | Lambda (reg.) value    |
+| --squared_roi       |     `bool`       | `True`             | Squared search window  |
+| --bigger_roi        |     `bool`       | `True`             | Bigger search window   |
 
 Run e.g.:
 
 
 ````
-python run_tracker.py --tracker_type resnet --learning_rate 1e-3 --ds_idx 4 --wait time 0
+python run_tracker.py --tracker_type resnet --learning_rate 1e-3 --ds_idx 4 --wait time 0 --bigger_roi True
 ````
 
 This would run dataset 4 with deep features (from a Resnet layer) in the multi-channel MOSSE with a learning rate of 1e-3, and the
@@ -29,7 +31,7 @@ user has to press any key to continue to the next frame (--wait_time 0).
 Saving visual results:
 
 ````
-python run_tracker.py --wait_time 0
+python run_tracker.py --wait_time 0 --squared_roi False
 ````
 
 And then, press "s" for saving the resulting image.
