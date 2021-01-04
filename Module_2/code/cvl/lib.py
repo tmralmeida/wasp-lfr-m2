@@ -134,8 +134,8 @@ def get_arguments():
         "-tt",
         type=str,
         default="mosse",
-        choices=["mosse", "resnet", "mobilenet", "alexnet", "vgg16", "hog", "cn", "hog_cn"],
-        help = "Mosse that you want to run. Options: grayscale mosse (mosse), Deep Features, Handcrafted features (hog, hog_cn, cn)"
+        choices=["mosse", "resnet", "mobilenet", "alexnet", "vgg16"],
+        help = "Mosse that you want to run. Options: grayscale mosse (mosse), Deep Features"
     )
         
     parser.add_argument(

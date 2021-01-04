@@ -132,7 +132,7 @@ class MOSSETracker:
 class DCFMOSSETracker:
     """ Mosse Tracker variable names according to the slides:
     inputs:
-        - feature_extractor: handcrafted or DL
+        - feature_extractor: Dl model name
         - lambda: regularization parameter,
         - learning_rate: hyperparameter
         - sigma: for 2D gaussian construction
@@ -177,36 +177,15 @@ class DCFMOSSETracker:
         """
         Crop, normalize and edges smoother (coisine window)
         """
-        if self.features_extractor in ["resnet", "mobilenet", "vgg16", "alexnet"]:
-            if self.features_extractor == "alexnet":
-                inp_shape = (227,227)
-            img_n = self.normalize_imgnet(self.crop_patch(img))
-            img_proc = cv2.resize(np.transpose(img_n, (1,2,0)), inp_shape)
-            out = np.transpose(img_proc, (2,0,1))
-        else: # handcrafted
-            out = self.crop_patch(img) 
+        if self.features_extractor == "alexnet":
+            inp_shape = (227,227)
+        img_n = self.normalize_imgnet(self.crop_patch(img))
+        img_proc = cv2.resize(np.transpose(img_n, (1,2,0)), inp_shape)
+        out = np.transpose(img_proc, (2,0,1))
         return out
-    
+
     def pos_process(self, feature_maps):
         return np.array([smooth_edge(fm) for fm in feature_maps])
-    
-    
-    def get_hog_feat(self, img):
-        cpb = (1, 1)
-        ppc = (3, 5)
-        n_ori = 8
-        hog_feat = np.empty([4, *img.shape[1:]])
-        hog_feat[0,...] =  smooth_edge(normalize(np.sum(img, 0) / 3))
-        for idx, ch in enumerate(img):
-            fd, hog_img = hog(smooth_edge(normalize(ch)), 
-                              orientations=n_ori, 
-                              pixels_per_cell=ppc, 
-                              cells_per_block=cpb,
-                              visualize=True, 
-                              multichannel=False)
-            hog_feat[idx+1, ...] = hog_img
-
-        return hog_feat
     
     
     def start(self, img, bbox, roi):
@@ -219,8 +198,6 @@ class DCFMOSSETracker:
             features = self.model(inp)
             feature_maps = features.squeeze().detach().cpu().numpy()
             feature_maps_h = self.pos_process(feature_maps) # applying cosine window
-        else: # hog
-            feature_maps_h = self.get_hog_feat(p)
         self.X = np.array([fft2(fm) for fm in feature_maps_h])
         
         y = get_2d_gauss(self.X.shape, sig = self.sig)
@@ -238,8 +215,6 @@ class DCFMOSSETracker:
             features = self.model(inp)
             feature_maps = features.squeeze().detach().cpu().numpy()
             feature_maps_h = self.pos_process(feature_maps) # applying cosine window
-        else: # hog
-            feature_maps_h = self.get_hog_feat(p)
         
         self.X = np.array([fft2(fm) for fm in feature_maps_h])  
               
